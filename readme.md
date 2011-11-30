@@ -1,6 +1,17 @@
-# tat(1)
+TAT(1)
+
+## Name
+ tat - tmux attach utility
+ 
+## Synopsis
+
+**tat [session_name | new_session_name]**
+
+## Description
+
 Tab completion for tmux sessions.
-Quickly open new tmux sessions in your projects dir.
+
+Quickly open new tmux sessions in your project's dir.
 
 ## Setup
 
@@ -12,6 +23,7 @@ export CODE_ROOT_DIR=/home/you/code
 ## Usage
 
 Use the tab key to open an existing session.
+
 ```bash
 $ tat [TAB]
 open_session_1 open_session_2
