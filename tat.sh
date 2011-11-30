@@ -3,7 +3,7 @@ tat()
   local session_name="$1"
   tmux attach-session -t "$session_name"
   if [ $? -ne 0 ]; then
-    local list of dirs=( $(find "$CODE_ROOT_DIR" -name "$session_name" -type d ) )
+    local list_of_dirs=( $(find "$CODE_ROOT_DIR" -name "$session_name" -type d ) )
     local first_found="${dirs[0]}"
     cd "$first_found"
     echo "tat() is creating new tmux session with name=$session_name"
