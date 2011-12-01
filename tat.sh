@@ -3,8 +3,11 @@ tat()
   local session_name="$1"
   tmux attach-session -t "$session_name"
   if [ $? -ne 0 ]; then
-    local list_of_dirs=( $(find "$CODE_ROOT_DIR" -name "$session_name" -type d | head -n 1 ) )
-    local first_found="${dirs[0]}"
+    local code_root_dirs=$(echo $CODE_ROOT_DIRS | sed 's/:/ /g')
+    local list_of_dirs=( $(find $code_root_dirs -name "$session_name" -type d -maxdepth 1 ) )
+    echo "tat() found the following dirs: $list_of_dirs"
+    echo "tat() is using dir = ${list_of_dirs[0]}"
+    local first_found="${list_of_dirs[0]}"
     cd "$first_found"
     echo "tat() is creating new tmux session with name=$session_name"
     tmux new-session -d -s "$session_name"
