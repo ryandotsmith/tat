@@ -40,4 +40,19 @@ $ pwd
 /home/you/code/my_project
 ```
 
+## Motivation
+
+There are popular tmux helpers on github. They require ruby and yaml file. No thanks! 
+It is my opinion that bash is the right tool for the job here. UNIX doesn't care about yaml.
+
+## Issues
+
+tat(1) assumes you have your code in a "root" dir; we use find(1) on this directory and there is not depth limit.
+Thus find may take a while. I think the use of find(1) could be tuned for better performance.
+
+**update**
+
+I have piped the output of find to head(1) -n 1. This is a bit of a hack, but head will close our pipe on the first result
+which will cause find to error out.
+
 
