@@ -2,7 +2,7 @@ TAT(1)
 
 ## Name
  tat - tmux attach utility
- 
+
 ## Synopsis
 
 **tat [session_name | new_session_name]**
@@ -16,8 +16,10 @@ Quickly open new tmux sessions in your project's dir.
 ## Setup
 
 ```bash
-source tat.sh
-export CODE_ROOT_DIR=/home/you/code
+git clone git://github.com/ryandotsmith/tat.git ~/path/to/tat
+echo "source ~/path/to/tat/tat.sh" >> ~/.bashrc
+echo "export CODE_ROOT_DIRS=\"/home/you/code\"" >> ~/.bashrc
+echo "export CODE_ROOT_DIRS=\"/home/you/other_code_dir:$CODE_ROOT_DIRS\"" >> ~/.bashrc
 ```
 
 ## Usage
