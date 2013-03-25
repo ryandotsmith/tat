@@ -1,27 +1,49 @@
-tat()
-{
+tat() {
   local session_name="$1"
-  tmux attach-session -t "$session_name"
-  if [ $? -ne 0 ]; then
-    local code_root_dirs=$(echo $CODE_ROOT_DIRS | sed 's/:/ /g')
-    local list_of_dirs=( $(find $code_root_dirs -name "$session_name" -type d -maxdepth 1 ) )
-    echo "tat() found the following dirs: $list_of_dirs"
-    echo "tat() is using dir = ${list_of_dirs[0]}"
-    local first_found="${list_of_dirs[0]}"
-    cd "$first_found"
-    echo "tat() is creating new tmux session with name=$session_name"
+  local sessions=( $(tmux list-sessions 2>/dev/null | cut -d ":" -f 1 | grep "^$session_name$") )
+
+  if [ ${#sessions[@]} -gt 0 ]; then
+    # If there is already a session with the same name, attach to it.
+    tmux attach-session -t "$session_name"
+  else
+    # If there is no existing session, create a new (detached) one.
     tmux new-session -d -s "$session_name"
-    echo "tat() is setting default path with dir=$first_found"
-    tmux set default-path "$first_found"
+
+    # Try to find a matching code directory.
+    local code_root_dirs=$(echo $CODE_ROOT_DIRS | sed 's/:/ /g')
+    local matching_dirs=( $(find $code_root_dirs -maxdepth 1 -name "$session_name" -type d ) )
+
+    # If there is a matching directory, set it as the default path and jump into the directory.
+    if [ ${#matching_dirs[@]} -gt 0 ]; then
+      local code_dir=${matching_dirs[0]}
+      tmux set default-path "$code_dir" 1>/dev/null
+      tmux send-keys -t "$session_name:1" "cd $code_dir && clear" C-m
+
+      # If there is a .tmux file in this directory, execute it.
+      if [ -f "$code_dir/.tmux" ]; then
+        eval "$code_dir/.tmux" $session_name
+      fi
+    fi
+
+    # Finally, attach to the newly created session.
     tmux attach-session -t "$session_name"
   fi
 }
-_tat()
-{
+
+_tat() {
   COMPREPLY=()
   local session="${COMP_WORDS[COMP_CWORD]}"
-  COMPREPLY=( $(compgen -W "$(tmux list-sessions 2>/dev/null | awk -F: '{ print $1 }')" -- "$session") )
+  local code_root_dirs=$(echo $CODE_ROOT_DIRS | sed 's/:/ /g')
+
+  # For autocomplete, use both existing sessions as well as directory names.
+  local sessions=( $(compgen -W "$(tmux list-sessions 2>/dev/null | awk -F: '{ print $1 }')" -- "$session") )
+  local directories=( $(
+  for dir in $code_root_dirs; do
+    cd "$dir" 2 >/dev/null && compgen -d -- "$session"
+  done
+  ) )
+
+  COMPREPLY=( ${sessions[@]} ${directories[@]} )
 }
-complete -F _tat tat
 
-
+complete -o filenames -o nospace -F _tat tat
