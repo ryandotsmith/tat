@@ -6,9 +6,6 @@ tat() {
     # If there is already a session with the same name, attach to it.
     tmux attach-session -t "$session_name"
   else
-    # If there is no existing session, create a new (detached) one.
-    tmux new-session -d -s "$session_name"
-
     # Try to find a matching code directory.
     local code_root_dirs=$(echo $CODE_ROOT_DIRS | sed 's/:/ /g')
     local matching_dirs=( $(find $code_root_dirs -maxdepth 1 -name "$session_name" -type d ) )
@@ -16,13 +13,14 @@ tat() {
     # If there is a matching directory, set it as the default path and jump into the directory.
     if [ ${#matching_dirs[@]} -gt 0 ]; then
       local code_dir=${matching_dirs[0]}
-      tmux set default-path "$code_dir" 1>/dev/null
-      tmux send-keys -t "$session_name:1" "cd $code_dir && clear" C-m
 
       # If there is a .tmux file in this directory, execute it.
       if [ -f "$code_dir/.tmux" ]; then
         eval "$code_dir/.tmux" $session_name
       fi
+      tmux new-session -d -s "$session_name" -c "$code_dir"
+    else
+      tmux new-session -d -s "$session_name"
     fi
 
     # Finally, attach to the newly created session.
